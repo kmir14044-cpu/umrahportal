@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Umrah Package Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css?v=22" />
+  </head>
+  <body>
+    <nav class="nav">
+      <div class="container navin">
+        <a class="brand" href="#">
+          <img class="brandLogo" src="./toursinpakistan-logo.png?v=1" alt="Tours in Pakistan">
+        </a>
+        <div class="links">
+          <a href="#designer">Umrah Designer</a>
+        </div>
+        <div class="navActions">
+          <a class="btn small alt" href="https://toursinpakistan.com/" target="_blank" rel="noreferrer">Website</a>
+          <a class="btn small" href="https://wa.me/923703049245">Talk to Expert</a>
+        </div>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="container heroIntro">
+        <span class="heroIcon" aria-hidden="true"></span>
+        <h1>Design your Umrah package</h1>
+        <p>Choose dates, route, hotels, rooms, transport and extras using your own 1448H data. The estimate stays zero until priced options are selected.</p>
+      </div>
+    </header>
+
+    <main class="container modernMain" id="designer">
+      <div class="designerLayout">
+        <section class="wizardCard">
+          <div class="wizardSteps" id="wizardSteps"></div>
+          <div class="wizardGrid" id="wizardGrid"></div>
+          <div class="wizardFooter">
+            <div id="summaryTags" class="summaryTags"></div>
+            <div class="wizardButtons">
+              <button class="btn small alt" id="backStepBtn" type="button">Previous</button>
+              <button class="btn redBtn" id="designBtn" type="button">Next</button>
+            </div>
+          </div>
+        </section>
+
+        <aside class="estimateCard" id="estimateCard"></aside>
+      </div>
+
+      <section class="resultBar hidden" id="resultBar">
+        <div>
+          <span class="pill greenPill">Live estimate</span>
+          <h2 id="previewTitle">Umrah package estimate</h2>
+          <p id="previewMeta">Select hotels and transport to start pricing.</p>
+        </div>
+        <div class="resultActions">
+          <span>Estimated total</span>
+          <strong id="price">Rs. 0</strong>
+          <div class="resultButtons">
+            <button class="btn small alt" id="editTripBtn" type="button">Edit Details</button>
+            <button class="btn small" id="pdfBtn" type="button">Download PDF</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel simplePanel hidden" id="itinerary">
+        <div class="sectionTitle">
+          <div>
+            <h2>Package Itinerary</h2>
+            <p>Generated from selected route, nights and hotels after submission.</p>
+          </div>
+        </div>
+        <div class="itinerary" id="itineraryList"></div>
+      </section>
+    </main>
+
+    <script src="./data.js?v=18"></script>
+    <script src="./app.js?v=30"></script>
+  </body>
+</html>

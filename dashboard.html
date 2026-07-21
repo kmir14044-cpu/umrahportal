@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Umrah Portal Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./dashboard.css?v=14" />
+  </head>
+  <body>
+    <main class="loginShell" id="loginShell">
+      <section class="loginPanel">
+        <a class="brand" href="./index.html">
+          <img class="brandLogo" src="./toursinpakistan-logo.png?v=1" alt="Tours in Pakistan">
+        </a>
+        <div>
+          <p class="eyebrow">Admin access</p>
+          <h1>Umrah portal dashboard</h1>
+          <p class="muted">Manage enquiries, hotel rate data, transport sectors and portal settings.</p>
+        </div>
+        <form class="loginCard" id="loginForm">
+          <label>Email<input id="loginEmail" type="email" value="admin@toursinpakistan.com" autocomplete="username" required></label>
+          <label>Password<input id="loginPassword" type="password" value="admin123" autocomplete="current-password" required></label>
+          <button class="primaryBtn" type="submit">Sign in</button>
+          <p class="loginHint">Authorized staff access only.</p>
+          <div class="alert hidden" id="loginAlert"></div>
+        </form>
+      </section>
+    </main>
+
+    <div class="adminShell hidden" id="adminShell">
+      <aside class="sidebar">
+        <a class="brand sidebarBrand" href="./index.html">
+          <img class="brandLogo sidebarLogo" src="./toursinpakistan-logo.png?v=1" alt="Tours in Pakistan">
+        </a>
+        <nav class="sideNav" id="sideNav">
+          <button class="active" data-view="overview" type="button">Dashboard</button>
+          <button data-view="leads" type="button">Leads</button>
+          <button data-view="hotels" type="button">Hotels</button>
+          <button data-view="vehicles" type="button">Vehicles</button>
+          <button data-view="transport" type="button">Transport</button>
+          <button data-view="settings" type="button">Settings</button>
+        </nav>
+        <div class="sidebarFoot">
+          <a href="./index.html">Open designer</a>
+          <button id="logoutBtn" type="button">Sign out</button>
+        </div>
+      </aside>
+
+      <main class="adminMain">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Tours in Pakistan</p>
+            <h1 id="viewTitle">Dashboard</h1>
+          </div>
+          <div class="topActions">
+            <a class="ghostBtn" href="./index.html">Designer</a>
+            <button class="primaryBtn small" id="exportLeadsBtn" type="button">Export Leads</button>
+          </div>
+        </header>
+
+        <section class="view active" id="overviewView">
+          <div class="statsGrid" id="statsGrid"></div>
+          <div class="dashboardMainGrid">
+            <article class="card profitCard">
+              <div class="cardHead">
+                <div>
+                  <h2>Profit by category</h2>
+                  <p>Added in SAR after hotel, transport and extras are calculated.</p>
+                </div>
+              </div>
+              <div class="profitGrid">
+                <label>Economy<input id="overviewProfitEconomySar" type="number" min="0"></label>
+                <label>Standard<input id="overviewProfitStandardSar" type="number" min="0"></label>
+                <label>Executive<input id="overviewProfitExecutiveSar" type="number" min="0"></label>
+              </div>
+              <div class="profitActions">
+                <button class="primaryBtn small" id="saveOverviewProfitBtn" type="button">Save Profit</button>
+                <span class="saveHint hidden" id="overviewProfitSaved">Saved</span>
+              </div>
+            </article>
+            <article class="card">
+              <div class="cardHead">
+                <div>
+                  <h2>Recent enquiries</h2>
+                  <p>Live quote requests from the designer and admin entries.</p>
+                </div>
+              </div>
+              <div class="compactList" id="recentLeads"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="leadsView">
+          <div class="card">
+            <div class="cardHead">
+              <div>
+                <h2>Leads</h2>
+                <p>Track customer enquiries, quote status and trip details.</p>
+              </div>
+              <button class="ghostBtn" id="addLeadBtn" type="button">Add Lead</button>
+            </div>
+            <div class="tableWrap">
+              <table class="leadsTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Route</th>
+                    <th>Date</th>
+                    <th>Hotels</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="leadsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="hotelsView">
+          <div class="card">
+            <div class="cardHead">
+              <div>
+                <h2>Hotels</h2>
+                <p>Seasonal rate records loaded from your Makkah, Madinah and Top Agent sheets.</p>
+              </div>
+              <div class="topActions">
+                <input class="searchBox" id="hotelSearch" type="search" placeholder="Search hotel or city">
+                <button class="ghostBtn" id="addHotelBtn" type="button">Add Hotel</button>
+              </div>
+            </div>
+            <div class="hotelGrid" id="hotelGrid"></div>
+          </div>
+        </section>
+
+        <section class="view" id="transportView">
+          <div class="card">
+            <div class="cardHead">
+              <div>
+                <h2>Transport</h2>
+                <p>Vehicle sector prices from the Harmain transport rate sheet.</p>
+              </div>
+              <div class="topActions">
+                <span class="badge">SAR per vehicle</span>
+                <button class="ghostBtn" id="addTransportBtn" type="button">Add Sector</button>
+              </div>
+            </div>
+            <div class="tableWrap">
+              <table>
+                <thead id="transportHead"></thead>
+                <tbody id="transportTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="vehiclesView">
+          <div class="card">
+            <div class="cardHead">
+              <div>
+                <h2>Vehicles</h2>
+                <p>Edit the vehicle types used in the designer dropdown and transport rate columns.</p>
+              </div>
+              <button class="ghostBtn" id="addVehicleBtn" type="button">Add Vehicle</button>
+            </div>
+            <div class="tableWrap">
+              <table class="vehiclesTable">
+                <thead>
+                  <tr>
+                    <th>Vehicle</th>
+                    <th>Capacity</th>
+                    <th>Type</th>
+                    <th>Image</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="vehiclesTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="settingsView">
+          <div class="card settingsCard">
+            <div>
+              <h2>Settings</h2>
+            <p>Calculation settings used by the quote engine. Customers only see the final rate.</p>
+            </div>
+            <label>Company Name<input id="companyName" type="text"></label>
+            <label>WhatsApp Number<input id="whatsappNumber" type="tel"></label>
+            <label>SAR to PKR Exchange Rate<input id="exchangeRateInput" type="number" min="1"></label>
+            <label>Economy Profit SAR<input id="profitEconomySarInput" type="number" min="0"></label>
+            <label>Standard Profit SAR<input id="profitStandardSarInput" type="number" min="0"></label>
+            <label>Executive Profit SAR<input id="profitExecutiveSarInput" type="number" min="0"></label>
+            <label>Visa Price Per Traveler PKR<input id="visaPriceInput" type="number" min="0"></label>
+            <label>Ziyarat Estimate SAR<input id="ziyaratSarInput" type="number" min="0"></label>
+            <label>PDF Footer Note<textarea id="pdfNote"></textarea></label>
+            <button class="primaryBtn" id="saveSettingsBtn" type="button">Save Settings</button>
+            <div class="alert success hidden" id="settingsSaved">Settings saved.</div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal hidden" id="leadModal">
+      <div class="modalBackdrop" data-close-modal></div>
+      <form class="modalCard" id="leadForm">
+        <button class="modalClose" data-close-modal type="button">x</button>
+        <h2 id="leadModalTitle">Add Lead</h2>
+        <input id="leadId" type="hidden">
+        <label>Name<input id="leadName" type="text" required></label>
+        <label>Phone<input id="leadPhone" type="tel" required></label>
+        <label>Route<input id="leadRoute" type="text" placeholder="Makkah -> Madinah" required></label>
+        <label>Trip Date<input id="leadDate" type="date" required></label>
+        <label>Hotels<input id="leadHotels" type="text" placeholder="Selected hotels"></label>
+        <label>Estimated Total<input id="leadTotal" type="text" placeholder="Rs. 0"></label>
+        <label>Status<select id="leadStatus"><option>New</option><option>Contacted</option><option>Quoted</option><option>Booked</option><option>Cancelled</option></select></label>
+        <div class="modalActions">
+          <button class="primaryBtn" type="submit">Save Lead</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal hidden" id="recordModal">
+      <div class="modalBackdrop" data-close-record></div>
+      <form class="modalCard wideModal" id="recordForm">
+        <button class="modalClose" data-close-record type="button">x</button>
+        <h2 id="recordTitle">Edit Record</h2>
+        <div id="recordFields"></div>
+        <div class="modalActions">
+          <button class="primaryBtn" type="submit">Save Record</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal hidden" id="viewModal">
+      <div class="modalBackdrop" data-close-view></div>
+      <div class="modalCard wideModal">
+        <button class="modalClose" data-close-view type="button">x</button>
+        <h2 id="viewTitleModal">Record Details</h2>
+        <div class="detailsBox" id="viewDetails"></div>
+      </div>
+    </div>
+
+    <script src="./data.js?v=18"></script>
+    <script src="./dashboard.js?v=19"></script>
+  </body>
+</html>
