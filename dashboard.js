@@ -94,6 +94,10 @@ function displayCategory(category) {
   return category || "Standard";
 }
 
+function displayText(value) {
+  return String(value ?? "").replace(/Madinah/g, "Madina");
+}
+
 function getLeads() {
   const leads = storageGet("umrahLeads", []);
   const withoutLegacyDemo = leads.filter((lead) => !["L-1001", "L-1002"].includes(lead.id));
@@ -354,7 +358,7 @@ function renderStats() {
   const madinah = hotels.filter((hotel) => hotel.city === "Madinah").length;
   const stats = [
     ["Leads", leads.length, `${pendingLeads} active / ${recentLeads.length} last 7 days`],
-    ["Hotels", hotels.length, `${makkah} Makkah / ${madinah} Madinah`]
+    ["Hotels", hotels.length, `${makkah} Makkah / ${madinah} Madina`]
   ];
   $("#statsGrid").innerHTML = stats.map(([label, value, hint], index) => `<button type="button" class="statCard" data-stat-view="${index === 0 ? "leads" : "hotels"}"><span>${label}</span><strong>${value}</strong><small>${hint}</small></button>`).join("");
   $$("[data-stat-view]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.statView)));
@@ -364,7 +368,7 @@ function renderRecentLeads() {
   const leads = getLeads().slice(0, 5);
   $("#recentLeads").innerHTML = leads.length ? leads.map((lead) => `
     <button class="miniItem enquiryButton" type="button" data-view-lead="${lead.id}">
-      <div><b>${escapeHtml(lead.name)}</b><small>${escapeHtml(lead.phone)} | ${escapeHtml(lead.route)} | ${escapeHtml(lead.date)}</small></div>
+      <div><b>${escapeHtml(lead.name)}</b><small>${escapeHtml(lead.phone)} | ${escapeHtml(displayText(lead.route))} | ${escapeHtml(lead.date)}</small></div>
       <span class="badge ${lead.status === "New" ? "gold" : ""}">${escapeHtml(lead.status)}</span>
     </button>
   `).join("") : `<div class="miniItem emptyState"><div><b>No enquiries yet</b><small>Submit a quote from the designer or add a lead manually.</small></div><button type="button" data-empty-add-lead>Add Lead</button></div>`;
@@ -399,9 +403,9 @@ function renderLeads() {
     <tr>
       <td class="leadNameCell"><b>${escapeHtml(lead.name || "Unnamed lead")}</b><small>${escapeHtml(lead.createdAt || "")}</small></td>
       <td>${escapeHtml(lead.phone || "-")}</td>
-      <td class="leadRouteCell"><span>${escapeHtml(lead.route || "-")}</span></td>
+      <td class="leadRouteCell"><span>${escapeHtml(displayText(lead.route || "-"))}</span></td>
       <td class="leadDateCell"><b>${escapeHtml(formatDate(lead.date))}</b><small>${escapeHtml(lead.date || "")}</small></td>
-      <td class="leadHotelsCell"><span>${escapeHtml(lead.hotels || "-")}</span></td>
+      <td class="leadHotelsCell"><span>${escapeHtml(displayText(lead.hotels || "-"))}</span></td>
       <td class="moneyCell">${escapeHtml(cleanTotal(lead.total))}</td>
       <td><select data-lead-status="${lead.id}">${statuses.map((status) => `<option ${status === lead.status ? "selected" : ""}>${status}</option>`).join("")}</select></td>
       <td class="actionCell">
@@ -433,14 +437,14 @@ function deleteLead(id) {
 function renderHotels() {
   const term = ($("#hotelSearch")?.value || "").toLowerCase().trim();
   const filtered = getHotels().filter((hotel) => `${hotel.name} ${hotel.city} ${displayCategory(hotel.category)}`.toLowerCase().includes(term));
-  $("#hotelGrid").innerHTML = filtered.map((hotel) => `
+  const renderHotelCards = (rows) => rows.length ? rows.map((hotel) => `
     <article class="hotelCard">
-      <img src="${hotelImage(hotel)}" alt="${escapeHtml(hotel.name)}">
+      <img src="${hotelImage(hotel)}" alt="${escapeHtml(displayText(hotel.name))}">
       <div class="hotelCardBody">
-        <div><h3>${escapeHtml(hotel.name)}</h3><p class="seasonLine">${escapeHtml(hotel.city)} | ${escapeHtml(hotel.distance)}</p></div>
+        <div><h3>${escapeHtml(displayText(hotel.name))}</h3><p class="seasonLine">${escapeHtml(displayText(hotel.city))} | ${escapeHtml(displayText(hotel.distance))}</p></div>
         <div class="hotelMeta"><span class="badge">${escapeHtml(displayCategory(hotel.category))}</span></div>
         <p class="seasonLine">${seasonSummary(hotel)}</p>
-        ${(hotel.customFields || []).map((item) => `<p class="seasonLine">${escapeHtml(item.label)}: ${escapeHtml(item.value)}</p>`).join("")}
+        ${(hotel.customFields || []).map((item) => `<p class="seasonLine">${escapeHtml(item.label)}: ${escapeHtml(displayText(item.value))}</p>`).join("")}
         <div class="rowActions cardActions">
           <button data-view-hotel="${hotel.id}" type="button">View</button>
           <button data-edit-hotel="${hotel.id}" type="button">Edit</button>
@@ -448,7 +452,13 @@ function renderHotels() {
         </div>
       </div>
     </article>
-  `).join("");
+  `).join("") : `<div class="emptyTableState hotelEmpty">No hotels found.</div>`;
+  const makkahHotels = filtered.filter((hotel) => hotel.city === "Makkah");
+  const madinaHotels = filtered.filter((hotel) => hotel.city === "Madinah");
+  $("#makkahHotelCount").textContent = `${makkahHotels.length} hotel${makkahHotels.length === 1 ? "" : "s"}`;
+  $("#madinaHotelCount").textContent = `${madinaHotels.length} hotel${madinaHotels.length === 1 ? "" : "s"}`;
+  $("#makkahHotelGrid").innerHTML = renderHotelCards(makkahHotels);
+  $("#madinaHotelGrid").innerHTML = renderHotelCards(madinaHotels);
   $$("[data-view-hotel]").forEach((button) => button.addEventListener("click", () => viewRecord("Hotel Details", getHotels().find((hotel) => hotel.id === button.dataset.viewHotel))));
   $$("[data-edit-hotel]").forEach((button) => button.addEventListener("click", () => openHotelEditor(getHotels().find((hotel) => hotel.id === button.dataset.editHotel))));
   $$("[data-delete-hotel]").forEach((button) => button.addEventListener("click", () => deleteHotel(button.dataset.deleteHotel)));
@@ -604,7 +614,7 @@ function seasonRatesTable(seasons = []) {
 
 function customFieldsView(fields = []) {
   if (!fields.length) return "-";
-  return `<div class="detailPillList">${fields.map((item) => `<span class="badge">${escapeHtml(item.label)}: ${escapeHtml(item.value)}</span>`).join("")}</div>`;
+  return `<div class="detailPillList">${fields.map((item) => `<span class="badge">${escapeHtml(item.label)}: ${escapeHtml(displayText(item.value))}</span>`).join("")}</div>`;
 }
 
 function detailValue(key, value) {
@@ -616,6 +626,7 @@ function detailValue(key, value) {
   if (Array.isArray(value)) return value.length ? value.map((item) => escapeHtml(typeof item === "object" ? Object.values(item).join(": ") : item)).join("<br>") : "-";
   if (value && typeof value === "object") return rateObjectTable(value);
   if (key === "date" || key === "createdAt" || key === "from" || key === "to") return escapeHtml(formatDate(value));
+  if (typeof value === "string") return escapeHtml(displayText(value || "-"));
   return escapeHtml(value || "-");
 }
 
@@ -673,7 +684,7 @@ function openHotelEditor(hotel) {
   $("#recordTitle").textContent = hotel ? "Edit Hotel" : "Add Hotel";
   $("#recordFields").innerHTML = `
     <label>Hotel Name<input id="recordName" value="${escapeHtml(record.name)}" required></label>
-    <label>Destination<select id="recordCity"><option ${record.city === "Makkah" ? "selected" : ""}>Makkah</option><option ${record.city === "Madinah" ? "selected" : ""}>Madinah</option></select></label>
+    <label>Destination<select id="recordCity"><option value="Makkah" ${record.city === "Makkah" ? "selected" : ""}>Makkah</option><option value="Madinah" ${record.city === "Madinah" ? "selected" : ""}>Madina</option></select></label>
     <label>Category<select id="recordCategory" required>
       ${["Economy", "Standard", "Executive"].map((category) => `<option ${displayCategory(record.category) === category ? "selected" : ""}>${category}</option>`).join("")}
     </select></label>
@@ -797,7 +808,7 @@ function deleteVehicle(id) {
 
 function downloadCsv() {
   const header = ["Name", "Phone", "Route", "Date", "Hotels", "Total", "Status", "Created"];
-  const rows = getLeads().map((lead) => [lead.name, lead.phone, lead.route, lead.date, lead.hotels || "", lead.total || "", lead.status, lead.createdAt || ""]);
+  const rows = getLeads().map((lead) => [lead.name, lead.phone, displayText(lead.route), lead.date, displayText(lead.hotels || ""), lead.total || "", lead.status, lead.createdAt || ""]);
   const csv = [header, ...rows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
   const link = document.createElement("a");

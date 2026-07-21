@@ -22,7 +22,7 @@ const state = {
   customSequence: ["Makkah", "Madinah"],
   stopNights: [],
   activeHotelStop: 0,
-  hotelCategory: "Standard",
+  hotelCategory: "Economy",
   transportMode: "full",
   vehicleOpen: false,
   submitted: false,
@@ -32,7 +32,7 @@ const state = {
 const wizardSteps = [
   { title: "Dates", hint: "Route and nights" },
   { title: "Group", hint: "Travelers" },
-  { title: "Hotels", hint: "Makkah and Madinah" },
+  { title: "Hotels", hint: "Makkah and Madina" },
   { title: "Transport", hint: "Vehicle and sectors" },
   { title: "Quote", hint: "Review and PDF" }
 ];
@@ -128,6 +128,10 @@ function vehicleLabel(id) {
   return vehicleRecord(id)?.name || id || "";
 }
 
+function displayText(value) {
+  return String(value ?? "").replace(/Madinah/g, "Madina");
+}
+
 const categoryOrder = ["Economy", "Standard", "Executive"];
 const categoryRank = { Economy: 0, Standard: 1, Executive: 2 };
 function displayCategory(category) {
@@ -190,6 +194,28 @@ function stopNightValues() {
 
 function resetStopNights() {
   state.stopNights = [];
+}
+
+function rebalanceStopNight(index, direction) {
+  const values = stopPlan().map((stop) => stop.nights);
+  if (!values.length || !values[index]) return;
+  const otherIndexes = values.map((_, itemIndex) => itemIndex).filter((itemIndex) => itemIndex !== index);
+  if (!otherIndexes.length) return;
+
+  if (direction < 0) {
+    if (values[index] <= 1) return;
+    const recipient = otherIndexes.find((itemIndex) => itemIndex > index) ?? otherIndexes[0];
+    values[index] -= 1;
+    values[recipient] += 1;
+  } else {
+    const donor = otherIndexes.find((itemIndex) => itemIndex > index && values[itemIndex] > 1)
+      ?? otherIndexes.find((itemIndex) => values[itemIndex] > 1);
+    if (donor === undefined) return;
+    values[index] += 1;
+    values[donor] -= 1;
+  }
+
+  state.stopNights = values;
 }
 
 function parseDate(value) {
@@ -332,15 +358,18 @@ function stopPlan() {
 function hotelStayCost(hotel, roomType, checkIn, nights) {
   const breakdown = [];
   let totalSar = 0;
+  const extraBedChildren = state.childAges.filter((age) => Number(age) >= 5).length;
   for (let night = 0; night < nights; night += 1) {
     const date = addDays(checkIn, night);
     const rate = nightlyHotelRate(hotel, roomType, date);
-    breakdown.push({ date, ...rate });
-    totalSar += rate.sar;
+    const extraBedSar = extraBedChildren * (Number(rate.season?.extraBed || hotel?.extraBed) || 0);
+    breakdown.push({ date, ...rate, extraBedSar });
+    totalSar += rate.sar + extraBedSar;
   }
   return {
     breakdown,
     totalSar,
+    extraBedChildren,
     avgSar: nights ? Math.round(totalSar / nights) : 0,
     hasMissingRates: breakdown.some((item) => !item.sar)
   };
@@ -474,7 +503,7 @@ function stepIsComplete() {
 
 function routeCards() {
   const options = [
-    ...routePresets.map((item) => [item.id, item.label, `${item.sequence[0]} first then ${item.sequence.slice(1).join(", ")}`]),
+    ...routePresets.map((item) => [item.id, displayText(item.label), displayText(`${item.sequence[0]} first then ${item.sequence.slice(1).join(", ")}`)]),
     ["custom", "Custom (Other)", "Choose your own city sequence"]
   ];
   return `<div class="routeCards">${options.map(([id, label, hint]) => `
@@ -490,9 +519,9 @@ function customRouteBuilder() {
     <div><b>Tap cities below in your travel order:</b><button type="button" data-clear-custom>Clear</button></div>
     <div class="customRouteActions">
       <button type="button" data-add-city="Makkah">Add Makkah</button>
-      <button type="button" data-add-city="Madinah">Add Madinah</button>
+      <button type="button" data-add-city="Madinah">Add Madina</button>
     </div>
-    <div class="cityChips">${state.customSequence.map((city, index) => `<span>${city}<button type="button" data-remove-city="${index}">x</button></span>`).join("<em>-></em>")}</div>
+    <div class="cityChips">${state.customSequence.map((city, index) => `<span>${displayText(city)}<button type="button" data-remove-city="${index}">x</button></span>`).join("<em>-></em>")}</div>
   </div>`;
 }
 
@@ -501,7 +530,7 @@ function nightsPerStop() {
   if (!plan.length || !Number(state.nights)) return "";
   return `<div class="nightsPanel"><b>Nights per Stop</b>${plan.map((stop) => `
     <div class="nightStop">
-      <span><small>Stop ${stop.index + 1}</small>${stop.city}</span>
+      <span><small>Stop ${stop.index + 1}</small>${displayText(stop.city)}</span>
       <div class="stopNightControl">
         <button type="button" class="circleBtn" data-stop-night="${stop.index}" data-dir="-1" ${stop.nights <= 1 ? "disabled" : ""}>-</button>
         <strong>${stop.nights} night${stop.nights === 1 ? "" : "s"}</strong>
@@ -517,7 +546,7 @@ function hotelStopTabs() {
   state.activeHotelStop = Math.min(state.activeHotelStop, plan.length - 1);
   return `<div class="hotelStopTabs">${plan.map((stop) => `
     <button type="button" class="${state.activeHotelStop === stop.index ? "active" : ""}" data-hotel-stop="${stop.index}">
-      <b>${stop.city}</b><small>Stop ${stop.index + 1} - ${stop.nights} nights</small>
+      <b>${displayText(stop.city)}</b><small>Stop ${stop.index + 1} - ${stop.nights} nights</small>
     </button>
   `).join("")}</div>`;
 }
@@ -534,7 +563,7 @@ function reviewItineraryBlock() {
   return `<div class="reviewBlock">
     <h3>Day-by-Day Itinerary</h3>
     ${q.hotelLines.map((line, index) => `
-      <div class="reviewDay"><b>${line.city}</b><small>${displayDate(line.checkIn)} to ${displayDate(line.checkOut)} - ${line.hotel ? line.hotel.name : "Hotel not selected"}</small></div>
+      <div class="reviewDay"><b>${displayText(line.city)}</b><small>${displayDate(line.checkIn)} to ${displayDate(line.checkOut)} - ${line.hotel ? displayText(line.hotel.name) : "Hotel not selected"}</small></div>
     `).join("")}
   </div>`;
 }
@@ -571,21 +600,21 @@ function effectiveTransportSectors() {
 const sectorNames = {
   "JED APT-MAK HTL": "Jeddah Airport to Makkah Hotel",
   "MAK HTL-JED APT": "Makkah Hotel to Jeddah Airport",
-  "MAK HTL-MED HTL": "Makkah Hotel to Madinah Hotel",
-  "MED HTL-MAK HTL": "Madinah Hotel to Makkah Hotel",
-  "JED APT-MED HTL": "Jeddah Airport to Madinah Hotel",
-  "MED APT-MED HTL": "Madinah Airport to Madinah Hotel",
-  "MED HTL-MED APT": "Madinah Hotel to Madinah Airport",
+  "MAK HTL-MED HTL": "Makkah Hotel to Madina Hotel",
+  "MED HTL-MAK HTL": "Madina Hotel to Makkah Hotel",
+  "JED APT-MED HTL": "Jeddah Airport to Madina Hotel",
+  "MED APT-MED HTL": "Madina Airport to Madina Hotel",
+  "MED HTL-MED APT": "Madina Hotel to Madina Airport",
   "MAKKAH ZIYARAT": "Makkah Ziyarat Tour",
-  "MADINA ZIYARAT": "Madinah Ziyarat Tour",
+  "MADINA ZIYARAT": "Madina Ziyarat Tour",
   "MAK HTL-TAIF ZIYARAT": "Makkah Hotel to Taif Ziyarat",
   "MAK HTL-MAK RAILWAY": "Makkah Hotel to Makkah Railway Station",
-  "MED HTL-MED RAILWAY": "Madinah Hotel to Madinah Railway Station",
-  "MAD TO MED (Via Badar)": "Madinah to Madinah via Badr",
+  "MED HTL-MED RAILWAY": "Madina Hotel to Madina Railway Station",
+  "MAD TO MED (Via Badar)": "Madina to Madina via Badr",
   "JED APT-JED CITY": "Jeddah Airport to Jeddah City",
-  "WADI JIN+MED ZIYARAT": "Wadi Jinn and Madinah Ziyarat",
+  "WADI JIN+MED ZIYARAT": "Wadi Jinn and Madina Ziyarat",
   "WADI JIN ZIYARAT ONLY": "Wadi Jinn Ziyarat Only",
-  "BADAR+MED ZIYARAT": "Badr and Madinah Ziyarat",
+  "BADAR+MED ZIYARAT": "Badr and Madina Ziyarat",
   "BADAR ZIYARAT ONLY": "Badr Ziyarat Only",
   "TAIF APT-MAK HTL": "Taif Airport to Makkah Hotel",
   "JORANA MEEQAT": "Jorana Meeqat Transfer",
@@ -593,7 +622,7 @@ const sectorNames = {
 };
 
 function sectorDisplayName(sector) {
-  return sectorNames[sector] || String(sector || "").replace(/\bAPT\b/g, "Airport").replace(/\bHTL\b/g, "Hotel").replace(/\bMED\b/g, "Madinah").replace(/\bMAK\b/g, "Makkah");
+  return sectorNames[sector] || String(sector || "").replace(/\bAPT\b/g, "Airport").replace(/\bHTL\b/g, "Hotel").replace(/\bMED\b/g, "Madina").replace(/\bMAK\b/g, "Makkah");
 }
 
 function readableTransportSectors() {
@@ -646,7 +675,7 @@ function ageFields() {
   const childRows = state.childAges.map((age, index) => `
     <label class="field ageField"><span>Child ${index + 1} age</span><select data-age-group="childAges" data-age-index="${index}">
       <option value="">Select age</option>
-      ${Array.from({ length: 10 }, (_, item) => item + 2).map((year) => `<option value="${year}" ${String(age) === String(year) ? "selected" : ""}>${year} years</option>`).join("")}
+      ${Array.from({ length: 11 }, (_, item) => item + 2).map((year) => `<option value="${year}" ${String(age) === String(year) ? "selected" : ""}>${year} years${year < 5 ? " - no bed" : " - extra bed"}</option>`).join("")}
     </select></label>
   `).join("");
   const infantRows = state.infantAges.map((age, index) => `
@@ -654,6 +683,7 @@ function ageFields() {
       <option value="">Select age</option>
       <option value="0" ${String(age) === "0" ? "selected" : ""}>Under 1 year</option>
       <option value="1" ${String(age) === "1" ? "selected" : ""}>1 year</option>
+      <option value="2" ${String(age) === "2" ? "selected" : ""}>2 years</option>
     </select></label>
   `).join("");
   if (!childRows && !infantRows) return "";
@@ -675,12 +705,12 @@ function hotelPreview() {
       const categories = categoryOrder.filter((category) => cityHotels.some((hotel) => displayCategory(hotel.category) === category));
       const activeCategory = categories.includes(state.hotelCategory) ? state.hotelCategory : categories[0];
       const visibleHotels = cityHotels.filter((hotel) => displayCategory(hotel.category) === activeCategory);
-      return `<div class="hotelStop"><h4>${city} stop ${index + 1}</h4>
+      return `<div class="hotelStop"><h4>${displayText(city)} stop ${index + 1}</h4>
       <div class="categoryTabs">${categories.map((category) => `<button type="button" class="${activeCategory === category ? "active" : ""}" data-category="${category}">${category}<small>${cityHotels.filter((hotel) => displayCategory(hotel.category) === category).length} hotels</small></button>`).join("")}</div>
       <div class="choiceGrid hotelChoices">
         ${visibleHotels.map((hotel) => `<button type="button" class="choiceCard ${state.selectedHotels[key] === hotel.id ? "active" : ""}" data-hotel-key="${key}" data-hotel="${hotel.id}">
-          <img src="${hotelImage(hotel)}" alt="${hotel.name}">
-          <span><b>${hotel.name}</b><small>${displayCategory(hotel.category)} - ${hotelRateLabel(hotel)}</small></span>
+          <img src="${hotelImage(hotel)}" alt="${displayText(hotel.name)}">
+          <span><b>${displayText(hotel.name)}</b><small>${displayCategory(hotel.category)} - ${hotelRateLabel(hotel)}</small></span>
         </button>`).join("")}
       </div></div>`;
     }).join("")}
@@ -774,7 +804,7 @@ function bind() {
       state.selectedHotels = {};
       state.selectedSectors = [];
       state.activeHotelStop = 0;
-      state.hotelCategory = "Standard";
+      state.hotelCategory = "Economy";
       resetStopNights();
       render();
     });
@@ -811,7 +841,7 @@ function bind() {
   document.querySelectorAll("[data-hotel-stop]").forEach((button) => {
     button.addEventListener("click", () => {
       state.activeHotelStop = Number(button.dataset.hotelStop);
-      state.hotelCategory = "Standard";
+      state.hotelCategory = "Economy";
       render();
     });
   });
@@ -902,11 +932,7 @@ function bind() {
   document.querySelectorAll("[data-stop-night]").forEach((button) => {
     button.addEventListener("click", () => {
       const index = Number(button.dataset.stopNight);
-      const values = stopPlan().map((stop) => stop.nights);
-      const next = Math.max(1, (values[index] || 1) + Number(button.dataset.dir));
-      values[index] = next;
-      state.stopNights = values;
-      state.nights = values.reduce((sum, value) => sum + value, 0);
+      rebalanceStopNight(index, Number(button.dataset.dir));
       render();
     });
   });
@@ -950,10 +976,10 @@ function renderSummary() {
   const sequence = routeSequence();
   const selectedHotels = Object.keys(state.selectedHotels).length;
   document.getElementById("price").textContent = money(q.total);
-  document.getElementById("previewTitle").textContent = sequence.length ? `${sequence.join(" -> ")} Umrah Package` : "Umrah package estimate";
+  document.getElementById("previewTitle").textContent = sequence.length ? `${displayText(sequence.join(" -> "))} Umrah Package` : "Umrah package estimate";
   document.getElementById("previewMeta").textContent = `${state.adults} adults - ${state.children} children - ${state.rooms} rooms - ${state.nights || 0} nights`;
   document.getElementById("summaryTags").innerHTML = [
-    sequence.length ? sequence.join(" -> ") : "Route pending",
+    sequence.length ? displayText(sequence.join(" -> ")) : "Route pending",
     state.startDate ? `Start ${displayDate(parseDate(state.startDate))}` : "Start date pending",
     state.nights ? `${state.nights} nights` : "Dates pending",
     selectedHotels ? `${selectedHotels} hotel stop${selectedHotels > 1 ? "s" : ""}` : "Hotels pending",
@@ -974,13 +1000,13 @@ function renderEstimateCard(q) {
     <small>${hasPrice ? "Final price may vary based on availability" : "Continue filling in your trip details to see pricing."}</small>
     <div class="estimateRows">
       <p><span>Duration</span><b>${state.nights || 0} nights</b></p>
-      <p><span>Cities</span><b>${sequence.length ? [...new Set(sequence)].join(", ") : "-"}</b></p>
+      <p><span>Cities</span><b>${sequence.length ? displayText([...new Set(sequence)].join(", ")) : "-"}</b></p>
       <p><span>Travelers</span><b>${state.adults + state.children} pax</b></p>
       <p><span>Visa</span><b>${state.visa ? "Included" : "Not included"}</b></p>
     </div>
     <div class="estimateBlock">
       <b>Stops & Hotels</b>
-      ${q.hotelLines.length ? q.hotelLines.map((line, index) => `<p><span>${line.city} - Stop ${index + 1}</span><b>${line.hotel ? line.hotel.name : "Not selected"}</b></p>`).join("") : "<small>No route selected yet</small>"}
+      ${q.hotelLines.length ? q.hotelLines.map((line, index) => `<p><span>${displayText(line.city)} - Stop ${index + 1}</span><b>${line.hotel ? displayText(line.hotel.name) : "Not selected"}</b></p>`).join("") : "<small>No route selected yet</small>"}
       <small>${state.rooms} x ${state.roomType || "room type"}</small>
     </div>
     <div class="estimateBlock">
@@ -1002,12 +1028,12 @@ function renderItinerary(q = quote()) {
   itinerary.classList.remove("hidden");
   document.getElementById("itineraryList").innerHTML = `
     ${q.hotelLines.map((line, index) => `<article class="day">
-      <img class="photo" src="${line.hotel ? hotelImage(line.hotel) : "./hotel-rate-sheet.jpeg"}" alt="${line.city}">
+      <img class="photo" src="${line.hotel ? hotelImage(line.hotel) : "./hotel-rate-sheet.jpeg"}" alt="${displayText(line.city)}">
       <div class="timeline">
-        <h3>${line.city}</h3>
+        <h3>${displayText(line.city)}</h3>
         <ul>
       <li>${line.nights} night${line.nights === 1 ? "" : "s"} stay - ${displayDate(line.checkIn)} to ${displayDate(line.checkOut)}</li>
-          <li>${line.hotel ? `${line.hotel.name} - ${displayCategory(line.hotel.category)}` : "Hotel not selected yet"}</li>
+          <li>${line.hotel ? `${displayText(line.hotel.name)} - ${displayCategory(line.hotel.category)}` : "Hotel not selected yet"}</li>
           <li>${line.stay?.hasMissingRates ? "Some nights need manual confirmation" : "Rates included in final estimate"}</li>
         </ul>
       </div>
@@ -1058,9 +1084,9 @@ function saveDashboardLead(q) {
     id: `L-${Date.now()}`,
     name: state.contactName || "Walk-in customer",
     phone: state.phone || "Not provided",
-    route: routeSequence().join(" -> ") || "Not selected",
+    route: displayText(routeSequence().join(" -> ")) || "Not selected",
     date: state.startDate || "Not selected",
-    hotels: q.hotelLines.map((line) => line.hotel?.name).filter(Boolean).join(", ") || "Not selected",
+    hotels: q.hotelLines.map((line) => displayText(line.hotel?.name || "")).filter(Boolean).join(", ") || "Not selected",
     total: money(q.total),
     status: "Quoted",
     createdAt: new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
@@ -1126,9 +1152,9 @@ function buildBrandedPdf(q, logo) {
   const travelers = state.adults + state.children;
   const hotelRows = q.hotelLines.map((line) => {
     const dates = `${displayDate(line.checkIn)} to ${displayDate(line.checkOut)}`;
-    return `${line.city}: ${line.hotel ? line.hotel.name : "Not selected"} | ${line.nights} nights | ${dates}`;
+    return `${displayText(line.city)}: ${line.hotel ? displayText(line.hotel.name) : "Not selected"} | ${line.nights} nights | ${dates}`;
   });
-  const itineraryRows = q.hotelLines.map((line) => `${line.city} stay from ${displayDate(line.checkIn)} to ${displayDate(line.checkOut)} at ${line.hotel ? line.hotel.name : "selected hotel pending confirmation"}.`);
+  const itineraryRows = q.hotelLines.map((line) => `${displayText(line.city)} stay from ${displayDate(line.checkIn)} to ${displayDate(line.checkOut)} at ${line.hotel ? displayText(line.hotel.name) : "selected hotel pending confirmation"}.`);
   const transportRows = [
     `Vehicle: ${vehicleLabel(state.vehicle) || "Not selected"}`,
     `Mode: ${state.transportMode === "full" ? "Full transport" : "Selective transport"}`,
@@ -1234,7 +1260,7 @@ function buildBrandedPdf(q, logo) {
   heading("Customer & Package Summary");
   row("Customer", state.contactName || "Not provided");
   row("Phone / WhatsApp", state.phone || "Not provided");
-  row("Route", routeSequence().join(" -> ") || "Not selected");
+  row("Route", displayText(routeSequence().join(" -> ")) || "Not selected");
   row("Travel Date", state.startDate || "Not selected");
   row("Duration", `${state.nights || 0} nights`);
   row("Travelers", `${state.adults} adults, ${state.children} children, ${state.infants} infants`);

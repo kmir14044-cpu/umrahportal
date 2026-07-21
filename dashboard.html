@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./dashboard.css?v=14" />
+    <link rel="stylesheet" href="./dashboard.css?v=15" />
   </head>
   <body>
     <main class="loginShell" id="loginShell">
@@ -127,14 +127,29 @@
             <div class="cardHead">
               <div>
                 <h2>Hotels</h2>
-                <p>Seasonal rate records loaded from your Makkah, Madinah and Top Agent sheets.</p>
+                <p>Seasonal rate records loaded from your Makkah, Madina and Top Agent sheets.</p>
               </div>
               <div class="topActions">
                 <input class="searchBox" id="hotelSearch" type="search" placeholder="Search hotel or city">
                 <button class="ghostBtn" id="addHotelBtn" type="button">Add Hotel</button>
               </div>
             </div>
-            <div class="hotelGrid" id="hotelGrid"></div>
+            <div class="hotelCitySections">
+              <section class="hotelCityBlock">
+                <div class="citySectionHead">
+                  <h3>Makkah Hotels</h3>
+                  <span id="makkahHotelCount">0 hotels</span>
+                </div>
+                <div class="hotelGrid" id="makkahHotelGrid"></div>
+              </section>
+              <section class="hotelCityBlock">
+                <div class="citySectionHead">
+                  <h3>Madina Hotels</h3>
+                  <span id="madinaHotelCount">0 hotels</span>
+                </div>
+                <div class="hotelGrid" id="madinaHotelGrid"></div>
+              </section>
+            </div>
           </div>
         </section>
 
@@ -215,7 +230,7 @@
         <input id="leadId" type="hidden">
         <label>Name<input id="leadName" type="text" required></label>
         <label>Phone<input id="leadPhone" type="tel" required></label>
-        <label>Route<input id="leadRoute" type="text" placeholder="Makkah -> Madinah" required></label>
+        <label>Route<input id="leadRoute" type="text" placeholder="Makkah -> Madina" required></label>
         <label>Trip Date<input id="leadDate" type="date" required></label>
         <label>Hotels<input id="leadHotels" type="text" placeholder="Selected hotels"></label>
         <label>Estimated Total<input id="leadTotal" type="text" placeholder="Rs. 0"></label>
@@ -248,6 +263,6 @@
     </div>
 
     <script src="./data.js?v=18"></script>
-    <script src="./dashboard.js?v=19"></script>
+    <script src="./dashboard.js?v=20"></script>
   </body>
 </html>
