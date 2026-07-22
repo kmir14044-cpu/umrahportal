@@ -578,7 +578,7 @@ function nightsPerStop() {
         <button type="button" class="circleBtn" data-stop-night="${stop.index}" data-dir="1">+</button>
       </div>
     </div>
-  `).join("")}<small>Adjust nights here; total duration updates automatically.</small></div>`;
+  `).join("")}</div>`;
 }
 
 function hotelStopTabs() {
