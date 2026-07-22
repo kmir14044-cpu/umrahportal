@@ -12,6 +12,14 @@ const hotelImages = {
   "Madinah-Executive": "https://tour-designer.lovable.app/assets/madinah-executive-D1rwdrR7.jpg"
 };
 
+const vehicleImages = {
+  Car: { src: "https://tse3.mm.bing.net/th?q=toyota%20camry%20sedan%20car&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7" },
+  Staria: { src: "https://tse3.mm.bing.net/th?q=hyundai%20staria%20van&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7" },
+  GMC: { src: "https://tse3.mm.bing.net/th?q=gmc%20yukon%20suv&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7" },
+  Hiace: { src: "https://tse3.mm.bing.net/th?q=toyota%20hiace%20van&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7" },
+  Coaster: { src: "https://tse3.mm.bing.net/th?q=toyota%20coaster%20bus&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7" }
+};
+
 const vehicleDefaults = {
   Car: {
     id: "Car",
@@ -19,7 +27,7 @@ const vehicleDefaults = {
     capacity: "4 pax",
     type: "Sedan",
     note: "Private car for small families",
-    photo: "https://loremflickr.com/640/360/toyota,camry,sedan/all"
+    photo: vehicleImages.Car.src
   },
   Staria: {
     id: "Staria",
@@ -27,7 +35,7 @@ const vehicleDefaults = {
     capacity: "7 pax",
     type: "Van",
     note: "Hyundai Staria style family van",
-    photo: "https://loremflickr.com/640/360/hyundai,staria,van/all"
+    photo: vehicleImages.Staria.src
   },
   GMC: {
     id: "GMC",
@@ -35,7 +43,7 @@ const vehicleDefaults = {
     capacity: "6 pax",
     type: "Premium SUV",
     note: "Premium SUV for private transfers",
-    photo: "https://loremflickr.com/640/360/gmc,yukon,suv/all"
+    photo: vehicleImages.GMC.src
   },
   Hiace: {
     id: "Hiace",
@@ -43,7 +51,7 @@ const vehicleDefaults = {
     capacity: "12 pax",
     type: "Van",
     note: "Toyota Hiace for medium groups",
-    photo: "https://loremflickr.com/640/360/toyota,hiace,van/all"
+    photo: vehicleImages.Hiace.src
   },
   Coaster: {
     id: "Coaster",
@@ -51,7 +59,7 @@ const vehicleDefaults = {
     capacity: "20 pax",
     type: "Bus",
     note: "Coaster bus for larger groups",
-    photo: "https://loremflickr.com/640/360/toyota,coaster,bus/all"
+    photo: vehicleImages.Coaster.src
   }
 };
 
@@ -243,6 +251,16 @@ function showApp() {
 function hotelImage(hotel) {
   if (hotel.photo) return hotel.photo;
   return searchImageUrl(`${hotel.name} ${hotel.city} hotel exterior`);
+}
+
+function vehicleImageUrl(vehicle) {
+  const photo = vehicle?.photo || "";
+  if (photo && !photo.includes("loremflickr.com")) return photo;
+  return vehicleImages[vehicle?.id]?.src || vehicleImages[vehicle?.name]?.src || vehicleImages.Car.src;
+}
+
+function imageFallbackAttr() {
+  return `onerror="this.onerror=null;this.src='./transport-rate-list.jpeg';"`;
 }
 
 function searchImageUrl(query) {
@@ -556,13 +574,13 @@ function renderVehicles() {
     <tr>
       <td class="vehicleCell" data-label="Vehicle">
         <div class="vehicleInfo">
-          <img src="${escapeHtml(vehicle.photo || "")}" alt="${escapeHtml(vehicle.name)}">
+          <img src="${escapeHtml(vehicleImageUrl(vehicle))}" alt="${escapeHtml(vehicle.name)}" ${imageFallbackAttr()}>
           <div><b>${escapeHtml(vehicle.name)}</b><small>${escapeHtml(vehicle.note || "No note added")}</small></div>
         </div>
       </td>
       <td data-label="Capacity">${escapeHtml(vehicle.capacity || "-")}</td>
       <td data-label="Type">${escapeHtml(vehicle.type || "-")}</td>
-      <td class="urlCell" data-label="Image">${vehicle.photo ? `<a href="${escapeHtml(vehicle.photo)}" target="_blank" rel="noreferrer">Open image</a><small>${escapeHtml(vehicle.photo)}</small>` : "-"}</td>
+      <td class="urlCell" data-label="Image"><a href="${escapeHtml(vehicleImageUrl(vehicle))}" target="_blank" rel="noreferrer">Open image</a><small>${escapeHtml(vehicleImageUrl(vehicle))}</small></td>
       <td class="actionCell" data-label="Action">
         <div class="rowActions leadActions">
           <button data-view-vehicle="${escapeHtml(vehicle.id)}" type="button">View</button>
@@ -789,13 +807,14 @@ function openTransportEditor(row) {
 function openVehicleEditor(vehicle) {
   recordMode = "vehicle";
   const record = vehicle || { id: `vehicle-${Date.now()}`, name: "", capacity: "", type: "", note: "", photo: "" };
+  const photoValue = record.photo && !record.photo.includes("loremflickr.com") ? record.photo : vehicleImageUrl(record);
   recordId = record.id;
   $("#recordTitle").textContent = vehicle ? "Edit Vehicle" : "Add Vehicle";
   $("#recordFields").innerHTML = `
     <label>Vehicle Name<input id="vehicleName" value="${escapeHtml(record.name)}" placeholder="Car" required></label>
     <label>Capacity<input id="vehicleCapacity" value="${escapeHtml(record.capacity || "")}" placeholder="4 pax"></label>
     <label>Vehicle Type<input id="vehicleType" value="${escapeHtml(record.type || "")}" placeholder="Sedan, Van, SUV"></label>
-    <label>Photo URL<input id="vehiclePhoto" value="${escapeHtml(record.photo || "")}" placeholder="https://..."></label>
+    <label>Photo URL<input id="vehiclePhoto" value="${escapeHtml(photoValue)}" placeholder="https://..."></label>
     <label class="fullField">Notes<textarea id="vehicleNote" placeholder="Private car for small families">${escapeHtml(record.note || "")}</textarea></label>
   `;
   $("#recordModal").classList.remove("hidden");

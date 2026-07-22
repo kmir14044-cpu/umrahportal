@@ -47,11 +47,11 @@ const hotelImages = {
 };
 
 const vehicleImages = {
-  Car: { src: "https://loremflickr.com/640/360/toyota,camry,sedan/all" },
-  Staria: { src: "https://loremflickr.com/640/360/hyundai,staria,van/all" },
-  GMC: { src: "https://loremflickr.com/640/360/gmc,yukon,suv/all" },
-  Hiace: { src: "https://loremflickr.com/640/360/toyota,hiace,van/all" },
-  Coaster: { src: "https://loremflickr.com/640/360/toyota,coaster,bus/all" }
+  Car: { src: "https://tse3.mm.bing.net/th?q=toyota%20camry%20sedan%20car&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7" },
+  Staria: { src: "https://tse3.mm.bing.net/th?q=hyundai%20staria%20van&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7" },
+  GMC: { src: "https://tse3.mm.bing.net/th?q=gmc%20yukon%20suv&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7" },
+  Hiace: { src: "https://tse3.mm.bing.net/th?q=toyota%20hiace%20van&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7" },
+  Coaster: { src: "https://tse3.mm.bing.net/th?q=toyota%20coaster%20bus&w=640&h=360&c=7&rs=1&p=0&o=5&pid=1.7" }
 };
 
 const vehicleDefaults = {
@@ -237,6 +237,16 @@ const hotelImage = (hotel) => {
   if (hotel?.photo) return hotel.photo;
   return searchImageUrl(`${hotel?.name || "hotel"} ${hotel?.city || "Saudi Arabia"} hotel exterior`);
 };
+
+function vehicleImageUrl(vehicle) {
+  const photo = vehicle?.photo || "";
+  if (photo && !photo.includes("loremflickr.com")) return photo;
+  return vehicleImages[vehicle?.id]?.src || vehicleImages[vehicle?.name]?.src || vehicleImages.Car.src;
+}
+
+function imageFallbackAttr() {
+  return `onerror="this.onerror=null;this.src='./transport-rate-list.jpeg';"`;
+}
 
 function distributedNights(total, stops) {
   const nights = Math.max(0, Number(total) || 0);
@@ -830,13 +840,13 @@ function vehicleField() {
     <span>Vehicle <b>*</b></span>
     <div class="vehicleDropdown">
       <button type="button" class="vehicleTrigger ${selectedVehicle ? "" : "empty"}" data-vehicle-toggle>
-        ${selectedVehicle?.photo ? `<img src="${selectedVehicle.photo}" alt="${selectedVehicle.name}">` : ""}
+        ${selectedVehicle ? `<img src="${vehicleImageUrl(selectedVehicle)}" alt="${selectedVehicle.name}" ${imageFallbackAttr()}>` : ""}
         <span><b>${selectedVehicle?.name || "Select vehicle"}</b><small>${selectedVehicle ? selectedVehicle.capacity || "Vehicle selected" : "Choose one vehicle for pricing"}</small></span>
       </button>
       <div class="vehicleMenu ${state.vehicleOpen ? "open" : ""}">
         ${vehicles.map((vehicle) => {
           return `<button type="button" class="${state.vehicle === vehicle.id ? "active" : ""}" data-vehicle-option="${vehicle.id}">
-            <img src="${vehicle.photo || vehicleImages.Car.src}" alt="${vehicle.name}">
+            <img src="${vehicleImageUrl(vehicle)}" alt="${vehicle.name}" ${imageFallbackAttr()}>
             <span><b>${vehicle.name}</b><small>${vehicle.capacity || ""}</small></span>
           </button>`;
         }).join("")}
