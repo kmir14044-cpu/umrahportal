@@ -86,7 +86,7 @@ function activeHotels() {
   const deleted = new Set(JSON.parse(localStorage.getItem("umrahDeletedHotels") || "[]"));
   const cleanHotel = (hotel) => {
     const { source, ...clean } = hotel || {};
-    return clean;
+    return applyListedHotelCategory(clean);
   };
   const baseRows = baseHotels
     .filter((hotel) => !deleted.has(hotel.id))
@@ -134,6 +134,71 @@ function displayText(value) {
 
 const categoryOrder = ["Economy", "Standard", "Executive"];
 const categoryRank = { Economy: 0, Standard: 1, Executive: 2 };
+const listedHotelCategories = {
+  "Maysan Al Mashaer": "Economy",
+  "Maysan Al Mahabas": "Economy",
+  "Maysan Al Safa Jarwal": "Economy",
+  "Maysan Al Maqam": "Economy",
+  "Maysan Al Multazem": "Economy",
+  "Maather Al Eiman": "Economy",
+  "Al Tayseer Tower": "Economy",
+  "Al Kiswah Towers": "Economy",
+  "Snood Ajyad": "Economy",
+  "Snood Al Rayan": "Economy",
+  "Dhiafat Al Rajaa": "Economy",
+  "Shurfat Al Talayea": "Economy",
+  "Nawazi Towers": "Economy",
+  "Palestine Hotel Makkah": "Economy",
+  "Dorrat Al Salah": "Economy",
+  "Al Manara": "Economy",
+  "Movenpick Hajjer": "Standard",
+  "Voco Hotel": "Standard",
+  "Courtyard Makkah": "Standard",
+  "Royal Majestic": "Standard",
+  "Al Shohada Hotel": "Standard",
+  "Elaf Ajyad": "Standard",
+  "Makarem Ajyad": "Standard",
+  "Emaar Grand": "Standard",
+  "Emaar Al Manar": "Standard",
+  "Ramada Al Fayzen": "Standard",
+  "Poinciana Hotel": "Standard",
+  "Badr Al Massah": "Standard",
+  "Bader Al Massah": "Standard",
+  "Grand Al Massah": "Standard",
+  "Olayan Palace": "Standard",
+  "Dar Al-Tawhid": "Executive",
+  "Hyatt Regency": "Executive",
+  "Address Jabal Omar": "Executive",
+  "Anjum Makkah": "Executive",
+  "Anjum Makkah Additional": "Executive",
+  "Sheraton Makkah": "Executive",
+  "Al Marwa Rayhaan": "Executive",
+  "Al Safwa Hotel (Tower 3)": "Executive",
+  "ZamZam Pullman Makkah": "Executive",
+  "Al Massah Grand": "Executive",
+  "Diyar Al Diwaniah - Ex Golden Tulip Shakreen": "Economy",
+  "Rawaby Al Zahra & Manazel Al Safia": "Economy",
+  "Peninsula Worth Hotel": "Economy",
+  "Tulip Inn Al Daar Rawafid": "Economy",
+  "Dar Aleman Al Haram Hotel": "Standard",
+  "Rotana Al Manakha": "Standard",
+  "Al Manakha Rotana": "Standard",
+  "Nusuk Al Madina": "Standard",
+  "Nusuk Al Hejra": "Standard",
+  "Maden Al Rawda Hotel": "Standard",
+  "Anwar Al Zahraa & Muhammadiyah Al Zahraa": "Standard",
+  "Pullman Zamzam Madina": "Executive",
+  "Mysk Touch Hotel": "Executive",
+  "Biltmore Madina Hotel": "Executive"
+};
+function normalizeHotelName(name) {
+  return displayText(name).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+const listedHotelCategoryByName = Object.fromEntries(Object.entries(listedHotelCategories).map(([name, category]) => [normalizeHotelName(name), category]));
+function applyListedHotelCategory(hotel) {
+  const category = listedHotelCategoryByName[normalizeHotelName(hotel?.name || "")];
+  return category ? { ...hotel, category } : hotel;
+}
 function displayCategory(category) {
   if (category === "Deluxe") return "Economy";
   return category || "Standard";
