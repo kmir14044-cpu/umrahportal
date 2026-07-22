@@ -195,6 +195,12 @@ button:disabled {
   gap: 32px;
   align-items: start;
 }
+.designerLayout > *,
+.wizardCard,
+.wizardGrid,
+.wizardSteps {
+  min-width: 0;
+}
 body[data-step="hotels"] .designerLayout {
   grid-template-columns: 1fr;
 }
@@ -232,6 +238,7 @@ body[data-step="hotels"] .hotelChoices {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
   padding: 14px 28px 0;
+  max-width: 100%;
   border-bottom: 1px solid #eee9e2;
 }
 .wizardSteps button {
@@ -1187,7 +1194,6 @@ body[data-step="hotels"] .hotelChoices {
   }
   .links { display: none; }
   .wizardGrid,
-  .wizardSteps,
   .designerLayout,
   .routeCards,
   .optionGrid,
@@ -1232,6 +1238,81 @@ body[data-step="hotels"] .hotelChoices {
   .estimateCard {
     position: static;
   }
+  .wizardSteps {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    overflow: visible;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid #eee9e2;
+    scrollbar-width: none;
+  }
+  .wizardSteps::-webkit-scrollbar {
+    display: none;
+  }
+  .wizardSteps button {
+    min-height: 54px;
+    grid-template-columns: 1fr;
+    grid-template-rows: 26px auto;
+    justify-items: center;
+    gap: 5px;
+    border-top: 0;
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 6px 2px 7px;
+    text-align: center;
+    position: relative;
+  }
+  .wizardSteps button::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #e8e5df;
+    z-index: 0;
+  }
+  .wizardSteps span {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: var(--muted);
+    background: #e8e5df;
+    font-size: 12px;
+  }
+  .wizardSteps b,
+  .wizardSteps small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wizardSteps b {
+    max-width: 100%;
+    font-size: 11px;
+  }
+  .wizardSteps small {
+    display: none;
+  }
+  .wizardSteps button.active,
+  .wizardSteps button.done {
+    border-left-color: transparent;
+  }
+  .wizardSteps button.active::before,
+  .wizardSteps button.done::before {
+    background: var(--green);
+  }
+  .wizardSteps button.active span,
+  .wizardSteps button.done span {
+    color: #fff;
+    background: var(--green);
+  }
 }
 
 @media (max-width: 620px) {
@@ -1239,8 +1320,57 @@ body[data-step="hotels"] .hotelChoices {
   .navActions .btn:not(:last-child) {
     display: none;
   }
+  .container,
+  .modernMain,
+  .heroIntro,
+  .navin {
+    width: min(100% - 24px, 1340px);
+  }
+  .navin {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 86px;
+    gap: 12px;
+    padding: 8px 0;
+  }
+  .brandLogo {
+    width: clamp(150px, 48vw, 210px);
+    height: 70px;
+  }
+  .navActions .btn {
+    min-height: 46px;
+    padding: 0 18px;
+    white-space: nowrap;
+  }
+  .hero {
+    padding: 12px 0 10px;
+  }
   .hero h1 {
-    font-size: 34px;
+    font-size: clamp(26px, 8vw, 34px);
+    line-height: 1.08;
+  }
+  .modernMain {
+    padding-top: 18px;
+  }
+  .wizardCard,
+  .estimateCard,
+  .resultBar,
+  .simplePanel {
+    border-radius: 10px;
+  }
+  .wizardSteps {
+    padding: 10px 10px 8px;
+  }
+  .wizardSteps button {
+    min-height: 50px;
+    padding: 5px 1px 6px;
+  }
+  .wizardSteps span {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+  .wizardSteps b {
+    font-size: 10px;
   }
   .choiceGrid {
     grid-template-columns: 1fr;
@@ -1255,12 +1385,25 @@ body[data-step="hotels"] .hotelChoices {
     display: none;
   }
   .wizardGrid {
-    padding: 20px;
-  }
-  .wizardSteps {
-    padding: 20px 20px 0;
+    gap: 14px;
+    padding: 18px;
   }
   .wizardFooter {
-    padding: 0 20px 20px;
+    padding: 14px 18px 18px;
+  }
+  .formIntro b {
+    font-size: 19px;
+  }
+  .field.big input,
+  .field.big select,
+  .emptySelect {
+    min-height: 48px;
+  }
+  .routeCard,
+  .optionGrid button {
+    min-height: 54px;
+  }
+  .estimateCard {
+    padding: 18px;
   }
 }
