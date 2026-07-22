@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./dashboard.css?v=15" />
+    <link rel="stylesheet" href="./dashboard.css?v=23" />
   </head>
   <body>
     <main class="loginShell" id="loginShell">
@@ -32,9 +32,14 @@
 
     <div class="adminShell hidden" id="adminShell">
       <aside class="sidebar">
-        <a class="brand sidebarBrand" href="./index.html">
-          <img class="brandLogo sidebarLogo" src="./toursinpakistan-logo.png?v=1" alt="Tours in Pakistan">
-        </a>
+        <div class="mobileMenuBar">
+          <a class="brand sidebarBrand" href="./index.html">
+            <img class="brandLogo sidebarLogo" src="./toursinpakistan-logo.png?v=1" alt="Tours in Pakistan">
+          </a>
+          <button class="menuToggle" id="menuToggle" type="button" aria-label="Open dashboard menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
         <nav class="sideNav" id="sideNav">
           <button class="active" data-view="overview" type="button">Dashboard</button>
           <button data-view="leads" type="button">Leads</button>
@@ -42,11 +47,9 @@
           <button data-view="vehicles" type="button">Vehicles</button>
           <button data-view="transport" type="button">Transport</button>
           <button data-view="settings" type="button">Settings</button>
+          <button class="navExportBtn" id="exportLeadsBtn" type="button">Export Leads</button>
+          <button class="navLogoutBtn" id="logoutBtn" type="button">Sign out</button>
         </nav>
-        <div class="sidebarFoot">
-          <a href="./index.html">Open designer</a>
-          <button id="logoutBtn" type="button">Sign out</button>
-        </div>
       </aside>
 
       <main class="adminMain">
@@ -55,15 +58,20 @@
             <p class="eyebrow">Tours in Pakistan</p>
             <h1 id="viewTitle">Dashboard</h1>
           </div>
-          <div class="topActions">
-            <a class="ghostBtn" href="./index.html">Designer</a>
-            <button class="primaryBtn small" id="exportLeadsBtn" type="button">Export Leads</button>
-          </div>
         </header>
 
         <section class="view active" id="overviewView">
           <div class="statsGrid" id="statsGrid"></div>
           <div class="dashboardMainGrid">
+            <article class="card">
+              <div class="cardHead">
+                <div>
+                  <h2>Recent enquiries</h2>
+                  <p>Live quote requests from the designer and admin entries.</p>
+                </div>
+              </div>
+              <div class="compactList" id="recentLeads"></div>
+            </article>
             <article class="card profitCard">
               <div class="cardHead">
                 <div>
@@ -80,15 +88,6 @@
                 <button class="primaryBtn small" id="saveOverviewProfitBtn" type="button">Save Profit</button>
                 <span class="saveHint hidden" id="overviewProfitSaved">Saved</span>
               </div>
-            </article>
-            <article class="card">
-              <div class="cardHead">
-                <div>
-                  <h2>Recent enquiries</h2>
-                  <p>Live quote requests from the designer and admin entries.</p>
-                </div>
-              </div>
-              <div class="compactList" id="recentLeads"></div>
             </article>
           </div>
         </section>
@@ -166,7 +165,7 @@
               </div>
             </div>
             <div class="tableWrap">
-              <table>
+              <table class="transportTable">
                 <thead id="transportHead"></thead>
                 <tbody id="transportTable"></tbody>
               </table>
@@ -263,6 +262,6 @@
     </div>
 
     <script src="./data.js?v=18"></script>
-    <script src="./dashboard.js?v=20"></script>
+    <script src="./dashboard.js?v=23"></script>
   </body>
 </html>

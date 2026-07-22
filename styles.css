@@ -1170,6 +1170,75 @@ body[data-step="hotels"] .hotelChoices {
 .timeline li {
   margin: 8px 0;
 }
+
+.submitModal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.submitBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 20, 14, .58);
+  backdrop-filter: blur(3px);
+}
+.submitDialog {
+  position: relative;
+  width: min(430px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  border: 1px solid #dfe9dc;
+  border-radius: 18px;
+  background: #fff;
+  padding: 30px 26px 26px;
+  text-align: center;
+  box-shadow: 0 26px 70px rgba(5, 36, 23, .26);
+}
+.submitClose {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--ink);
+  background: #fff;
+  font-weight: 900;
+}
+.submitIcon {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(135deg, #0a7a4d, #073f29);
+  box-shadow: 0 14px 28px rgba(8, 97, 62, .22);
+  font-size: 30px;
+  font-weight: 900;
+}
+.submitDialog h2 {
+  margin: 4px 0 0;
+  color: var(--green2);
+  font-size: 28px;
+  line-height: 1.1;
+}
+.submitDialog p {
+  max-width: 330px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.submitDialog .btn {
+  width: min(240px, 100%);
+  margin-top: 6px;
+  background: linear-gradient(135deg, #08291f, #0a6945);
+}
 .rateSheets {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1328,49 +1397,65 @@ body[data-step="hotels"] .hotelChoices {
   }
   .navin {
     grid-template-columns: minmax(0, 1fr) auto;
-    min-height: 86px;
-    gap: 12px;
-    padding: 8px 0;
+    min-height: 72px;
+    gap: 10px;
+    padding: 6px 0;
   }
   .brandLogo {
-    width: clamp(150px, 48vw, 210px);
-    height: 70px;
+    width: clamp(132px, 42vw, 176px);
+    height: 58px;
   }
   .navActions .btn {
-    min-height: 46px;
-    padding: 0 18px;
+    min-height: 42px;
+    padding: 0 14px;
+    border-radius: 9px;
+    font-size: 13px;
     white-space: nowrap;
   }
   .hero {
-    padding: 12px 0 10px;
+    padding: 10px 0 8px;
+    background: #fbfaf7;
   }
   .hero h1 {
-    font-size: clamp(26px, 8vw, 34px);
-    line-height: 1.08;
+    max-width: 360px;
+    color: #0f2d4d;
+    font-size: clamp(24px, 7vw, 30px);
+    line-height: 1.05;
   }
   .modernMain {
-    padding-top: 18px;
+    width: min(100% - 20px, 1340px);
+    padding-top: 12px;
+    padding-bottom: 34px;
   }
   .wizardCard,
   .estimateCard,
   .resultBar,
   .simplePanel {
-    border-radius: 10px;
+    border-radius: 12px;
+    box-shadow: 0 12px 28px rgba(16, 24, 40, .06);
   }
   .wizardSteps {
-    padding: 10px 10px 8px;
+    gap: 0;
+    padding: 12px 10px 9px;
   }
   .wizardSteps button {
-    min-height: 50px;
-    padding: 5px 1px 6px;
+    min-height: 42px;
+    padding: 3px 1px 4px;
+  }
+  .wizardSteps button::before {
+    top: 14px;
+    height: 2px;
   }
   .wizardSteps span {
-    width: 24px;
-    height: 24px;
-    font-size: 11px;
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
   }
   .wizardSteps b {
-    font-size: 10px;
+    margin-top: 1px;
+    color: #173252;
+    font-size: 9px;
+    line-height: 1.1;
   }
   .choiceGrid {
     grid-template-columns: 1fr;
@@ -1385,25 +1470,48 @@ body[data-step="hotels"] .hotelChoices {
     display: none;
   }
   .wizardGrid {
-    gap: 14px;
-    padding: 18px;
+    gap: 15px;
+    padding: 20px 18px 18px;
   }
   .wizardFooter {
-    padding: 14px 18px 18px;
+    padding: 12px 18px 18px;
   }
   .formIntro b {
-    font-size: 19px;
+    color: #173252;
+    font-size: 20px;
+    line-height: 1.15;
+  }
+  .formIntro small {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.5;
   }
   .field.big input,
   .field.big select,
   .emptySelect {
-    min-height: 48px;
+    min-height: 46px;
+    border-radius: 9px;
   }
   .routeCard,
   .optionGrid button {
-    min-height: 54px;
+    min-height: 58px;
+    border-radius: 9px;
+    padding: 12px;
   }
-  .estimateCard {
-    padding: 18px;
+  .estimateCard,
+  body[data-submitted="false"] .estimateCard,
+  body[data-submitted="true"] .estimateCard {
+    display: none;
+  }
+  body[data-submitted="true"] .hero,
+  body[data-submitted="true"] .wizardCard {
+    display: none;
+  }
+  .submitModal {
+    padding: 14px;
+  }
+  .submitDialog {
+    border-radius: 16px;
+    padding: 28px 18px 22px;
   }
 }

@@ -401,14 +401,14 @@ function renderLeads() {
   }
   $("#leadsTable").innerHTML = leads.map((lead) => `
     <tr>
-      <td class="leadNameCell"><b>${escapeHtml(lead.name || "Unnamed lead")}</b><small>${escapeHtml(lead.createdAt || "")}</small></td>
-      <td>${escapeHtml(lead.phone || "-")}</td>
-      <td class="leadRouteCell"><span>${escapeHtml(displayText(lead.route || "-"))}</span></td>
-      <td class="leadDateCell"><b>${escapeHtml(formatDate(lead.date))}</b><small>${escapeHtml(lead.date || "")}</small></td>
-      <td class="leadHotelsCell"><span>${escapeHtml(displayText(lead.hotels || "-"))}</span></td>
-      <td class="moneyCell">${escapeHtml(cleanTotal(lead.total))}</td>
-      <td><select data-lead-status="${lead.id}">${statuses.map((status) => `<option ${status === lead.status ? "selected" : ""}>${status}</option>`).join("")}</select></td>
-      <td class="actionCell">
+      <td class="leadNameCell" data-label="Name"><b>${escapeHtml(lead.name || "Unnamed lead")}</b><small>${escapeHtml(lead.createdAt || "")}</small></td>
+      <td data-label="Phone">${escapeHtml(lead.phone || "-")}</td>
+      <td class="leadRouteCell" data-label="Route"><span>${escapeHtml(displayText(lead.route || "-"))}</span></td>
+      <td class="leadDateCell" data-label="Date"><b>${escapeHtml(formatDate(lead.date))}</b><small>${escapeHtml(lead.date || "")}</small></td>
+      <td class="leadHotelsCell" data-label="Hotels"><span>${escapeHtml(displayText(lead.hotels || "-"))}</span></td>
+      <td class="moneyCell" data-label="Total">${escapeHtml(cleanTotal(lead.total))}</td>
+      <td data-label="Status"><select data-lead-status="${lead.id}">${statuses.map((status) => `<option ${status === lead.status ? "selected" : ""}>${status}</option>`).join("")}</select></td>
+      <td class="actionCell" data-label="Action">
         <div class="rowActions leadActions">
           <button data-view-lead="${lead.id}" type="button">View</button>
           <button data-edit-lead="${lead.id}" type="button">Edit</button>
@@ -469,9 +469,9 @@ function renderTransport() {
   $("#transportHead").innerHTML = `<tr><th>Sector</th>${vehicles.map((vehicle) => `<th>${escapeHtml(vehicle.name)}</th>`).join("")}<th>Action</th></tr>`;
   $("#transportTable").innerHTML = getTransportRates().map((row) => `
     <tr>
-      <td><b>${escapeHtml(row.sector)}</b></td>
-      ${vehicles.map((vehicle) => `<td>SAR ${escapeHtml(row.rates[vehicle.id] || 0)}</td>`).join("")}
-      <td class="actionCell">
+      <td data-label="Sector"><b>${escapeHtml(row.sector)}</b></td>
+      ${vehicles.map((vehicle) => `<td data-label="${escapeHtml(vehicle.name)}">SAR ${escapeHtml(row.rates[vehicle.id] || 0)}</td>`).join("")}
+      <td class="actionCell" data-label="Action">
         <div class="rowActions leadActions">
           <button data-view-transport="${escapeHtml(row.sector)}" type="button">View</button>
           <button data-edit-transport="${escapeHtml(row.sector)}" type="button">Edit</button>
@@ -488,16 +488,16 @@ function renderTransport() {
 function renderVehicles() {
   $("#vehiclesTable").innerHTML = getVehicles().map((vehicle) => `
     <tr>
-      <td class="vehicleCell">
+      <td class="vehicleCell" data-label="Vehicle">
         <div class="vehicleInfo">
           <img src="${escapeHtml(vehicle.photo || "")}" alt="${escapeHtml(vehicle.name)}">
           <div><b>${escapeHtml(vehicle.name)}</b><small>${escapeHtml(vehicle.note || "No note added")}</small></div>
         </div>
       </td>
-      <td>${escapeHtml(vehicle.capacity || "-")}</td>
-      <td>${escapeHtml(vehicle.type || "-")}</td>
-      <td class="urlCell">${vehicle.photo ? `<a href="${escapeHtml(vehicle.photo)}" target="_blank" rel="noreferrer">Open image</a><small>${escapeHtml(vehicle.photo)}</small>` : "-"}</td>
-      <td class="actionCell">
+      <td data-label="Capacity">${escapeHtml(vehicle.capacity || "-")}</td>
+      <td data-label="Type">${escapeHtml(vehicle.type || "-")}</td>
+      <td class="urlCell" data-label="Image">${vehicle.photo ? `<a href="${escapeHtml(vehicle.photo)}" target="_blank" rel="noreferrer">Open image</a><small>${escapeHtml(vehicle.photo)}</small>` : "-"}</td>
+      <td class="actionCell" data-label="Action">
         <div class="rowActions leadActions">
           <button data-view-vehicle="${escapeHtml(vehicle.id)}" type="button">View</button>
           <button data-edit-vehicle="${escapeHtml(vehicle.id)}" type="button">Edit</button>
@@ -835,9 +835,25 @@ $("#logoutBtn").addEventListener("click", () => {
   showApp();
 });
 
-$$("#sideNav button").forEach((button) => button.addEventListener("click", () => setView(button.dataset.view)));
+$("#menuToggle")?.addEventListener("click", () => {
+  const sidebar = $(".sidebar");
+  const isOpen = sidebar.classList.toggle("menuOpen");
+  $("#menuToggle").setAttribute("aria-expanded", String(isOpen));
+  $("#menuToggle").setAttribute("aria-label", isOpen ? "Close dashboard menu" : "Open dashboard menu");
+});
+$$("#sideNav button[data-view]").forEach((button) => button.addEventListener("click", () => {
+  setView(button.dataset.view);
+  $(".sidebar")?.classList.remove("menuOpen");
+  $("#menuToggle")?.setAttribute("aria-expanded", "false");
+  $("#menuToggle")?.setAttribute("aria-label", "Open dashboard menu");
+}));
 $("#hotelSearch").addEventListener("input", renderHotels);
-$("#exportLeadsBtn").addEventListener("click", downloadCsv);
+$("#exportLeadsBtn").addEventListener("click", () => {
+  downloadCsv();
+  $(".sidebar")?.classList.remove("menuOpen");
+  $("#menuToggle")?.setAttribute("aria-expanded", "false");
+  $("#menuToggle")?.setAttribute("aria-label", "Open dashboard menu");
+});
 $("#addLeadBtn").addEventListener("click", () => openLeadModal());
 $("#addHotelBtn").addEventListener("click", () => openHotelEditor(null));
 $("#addVehicleBtn").addEventListener("click", () => openVehicleEditor(null));

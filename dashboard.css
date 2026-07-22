@@ -74,11 +74,12 @@ button { cursor: pointer; }
     linear-gradient(135deg, #ffffff 0%, #f5f8ef 62%, #eef7ea 100%);
 }
 .loginPanel {
-  width: min(980px, 100%);
+  width: min(560px, 100%);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 390px;
-  gap: 34px;
+  grid-template-columns: 1fr;
+  gap: 18px;
   align-items: center;
+  text-align: center;
   border: 1px solid var(--line);
   border-radius: 20px;
   background: rgba(255, 255, 255, .92);
@@ -87,11 +88,17 @@ button { cursor: pointer; }
 }
 .loginPanel h1 {
   margin: 0 0 12px;
-  max-width: 470px;
+  max-width: none;
   color: var(--green2);
   font-family: inherit;
   font-size: clamp(34px, 5vw, 52px);
   line-height: .98;
+}
+.loginPanel .brand {
+  justify-content: center;
+}
+.loginPanel .brandLogo {
+  object-position: center center;
 }
 .loginCard {
   display: grid;
@@ -100,6 +107,14 @@ button { cursor: pointer; }
   border: 1px solid var(--line);
   border-radius: 16px;
   background: #fff;
+  text-align: center;
+  width: 100%;
+}
+.loginCard label {
+  text-align: left;
+}
+.loginCard input {
+  text-align: left;
 }
 label {
   display: grid;
@@ -189,11 +204,18 @@ input:focus, select:focus, textarea:focus {
 .sidebarBrand {
   color: #eafff4;
 }
+.mobileMenuBar {
+  display: contents;
+}
+.menuToggle {
+  display: none;
+}
 .sideNav {
   display: grid;
   gap: 7px;
 }
 .sideNav button,
+.navExportBtn,
 .sidebarFoot a,
 .sidebarFoot button {
   width: 100%;
@@ -210,6 +232,26 @@ input:focus, select:focus, textarea:focus {
 .sideNav button.active {
   background: #176a49;
 }
+.sideNav .navExportBtn {
+  margin-top: 12px;
+  color: #06432d;
+  background: #fff;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, .14);
+}
+.sideNav .navExportBtn:hover {
+  color: #fff;
+  background: #0b5f3f;
+}
+.sideNav .navLogoutBtn {
+  margin-top: 2px;
+  color: #ffd9d9;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .04);
+}
+.sideNav .navLogoutBtn:hover {
+  color: #fff;
+  background: #8a1720;
+}
 .sidebarFoot {
   display: grid;
   gap: 8px;
@@ -225,6 +267,9 @@ input:focus, select:focus, textarea:focus {
 
 .adminMain {
   min-width: 0;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
   padding: 28px clamp(18px, 3vw, 34px) 48px;
 }
 .topbar {
@@ -915,6 +960,7 @@ figcaption {
   .sidebar {
     position: relative;
     height: auto;
+    padding: 18px;
   }
   .sideNav {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -928,20 +974,183 @@ figcaption {
 }
 
 @media (max-width: 680px) {
+  body {
+    background: #f8faf5;
+    overflow-x: hidden;
+  }
+  .adminShell,
+  .adminMain,
+  .sidebar,
+  .topbar,
+  .view,
+  .card,
+  .statsGrid,
+  .dashboardMainGrid,
+  .profitGrid,
+  .compactList,
+  .hotelCitySections,
+  .hotelGrid,
+  .tableWrap {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
   .loginShell,
   .adminMain {
-    padding: 16px;
+    padding: 14px;
+  }
+  .adminMain {
+    display: grid;
+    justify-items: center;
+  }
+  .adminMain > * {
+    width: min(100%, 560px);
+  }
+  .loginPanel {
+    gap: 18px;
+    border-radius: 14px;
+  }
+  .loginPanel h1 {
+    font-size: clamp(30px, 9vw, 42px);
+  }
+  .brandLogo {
+    width: 170px;
+    height: 58px;
+  }
+  .sidebarLogo {
+    width: 145px;
+    height: 50px;
+  }
+  .sidebar {
+    position: relative;
+    top: 0;
+    z-index: 20;
+    gap: 10px;
+    padding: 14px 12px;
+    height: 80px;
+    min-height: 80px;
+    border-bottom: 1px solid rgba(255, 255, 255, .12);
+  }
+  .mobileMenuBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .sidebarBrand {
+    justify-content: flex-start;
+    min-width: 0;
+  }
+  .menuToggle {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    gap: 4px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    padding: 10px;
+  }
+  .menuToggle span {
+    display: block;
+    width: 24px;
+    height: 3px;
+    border-radius: 99px;
+    background: #fff;
+    transition: transform .18s ease, opacity .18s ease;
+  }
+  .sidebar.menuOpen .menuToggle span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .sidebar.menuOpen .menuToggle span:nth-child(2) {
+    opacity: 0;
+  }
+  .sidebar.menuOpen .menuToggle span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+  .sideNav {
+    display: none;
+    position: absolute;
+    top: 76px;
+    right: 12px;
+    z-index: 40;
+    width: min(260px, calc(100vw - 24px));
+    grid-template-columns: 1fr;
+    gap: 8px;
+    overflow: visible;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 16px;
+    background: #06432d;
+    box-shadow: 0 22px 50px rgba(0, 0, 0, .28);
+  }
+  .sidebar.menuOpen .sideNav {
+    display: grid;
+  }
+  .sideNav button {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 10px;
+    padding: 0 14px;
+    text-align: left;
+    white-space: normal;
+    font-size: 13px;
+    color: #ecfff5;
+    background: rgba(255, 255, 255, .06);
+  }
+  .sideNav .navExportBtn {
+    margin-top: 4px;
+    color: #06432d;
+    background: #fff;
+    text-align: center;
+  }
+  .sideNav .navLogoutBtn {
+    text-align: center;
+  }
+  .sideNav button:hover,
+  .sideNav button.active {
+    color: #06432d;
+    background: #fff;
+  }
+  .sidebarFoot {
+    display: none;
   }
   .loginPanel,
   .card {
-    padding: 16px;
+    padding: 14px;
+    border-radius: 14px;
   }
   .topbar,
   .cardHead {
     display: grid;
+    gap: 12px;
+  }
+  .topbar {
+    margin-bottom: 14px;
+  }
+  .topbar h1 {
+    font-size: 30px;
+  }
+  .eyebrow {
+    margin-bottom: 5px;
+    font-size: 11px;
   }
   .topActions {
     justify-content: flex-start;
+    width: 100%;
+  }
+  .topActions .ghostBtn,
+  .topActions .primaryBtn {
+    flex: 1 1 130px;
+  }
+  .ghostBtn,
+  .primaryBtn {
+    min-height: 40px;
+    border-radius: 10px;
+    padding: 0 13px;
+    font-size: 13px;
   }
   .sideNav,
   .statsGrid,
@@ -950,13 +1159,216 @@ figcaption {
   .ratePreview {
     grid-template-columns: 1fr;
   }
-  table {
-    min-width: 680px;
+  .tableWrap {
+    margin-inline: -4px;
+    border-radius: 12px;
+    max-height: none;
+    overflow: visible;
+  }
+  .leadsTable,
+  .vehiclesTable,
+  .transportTable {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: transparent;
+  }
+  .leadsTable thead,
+  .vehiclesTable thead,
+  .transportTable thead {
+    display: none;
+  }
+  .leadsTable tbody,
+  .vehiclesTable tbody,
+  .transportTable tbody {
+    display: grid;
+    gap: 10px;
+  }
+  .leadsTable tr,
+  .vehiclesTable tr,
+  .transportTable tr {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+  }
+  .leadsTable td,
+  .vehiclesTable td,
+  .transportTable td {
+    display: grid;
+    grid-template-columns: 94px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    padding: 0;
+    border: 0;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .leadsTable td::before,
+  .vehiclesTable td::before,
+  .transportTable td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    font-size: 10px;
+  }
+  .leadsTable td[colspan],
+  .vehiclesTable td[colspan],
+  .transportTable td[colspan] {
+    display: block;
+  }
+  .leadsTable td[colspan]::before,
+  .vehiclesTable td[colspan]::before,
+  .transportTable td[colspan]::before {
+    content: "";
+  }
+  .leadNameCell,
+  .vehicleCell,
+  .transportTable td:first-child {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5eee0;
+  }
+  .leadRouteCell,
+  .leadHotelsCell {
+    max-width: none;
+  }
+  .moneyCell {
+    text-align: left;
+  }
+  .actionCell {
+    padding-top: 4px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .actionCell::before {
+    display: block;
+  }
+  .actionCell .rowActions,
+  .leadActions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+  .actionCell .rowActions button,
+  .leadActions button {
+    width: 100%;
+    min-height: 36px;
+    padding: 0 8px;
+  }
+  .vehiclesTable .urlCell small {
+    display: none;
+  }
+  .statsGrid {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .statCard {
+    min-height: 96px;
+    border-radius: 13px;
+    padding: 14px;
+  }
+  .statCard strong {
+    margin-top: 9px;
+    font-size: 30px;
+  }
+  .profitGrid {
+    grid-template-columns: 1fr;
+  }
+  .compactList,
+  .healthList {
+    gap: 8px;
+  }
+  .miniItem,
+  .healthItem {
+    display: grid;
+    gap: 8px;
+    padding: 11px;
+  }
+  .miniItem .badge,
+  .healthItem .badge {
+    justify-self: start;
+  }
+  .cardHead .topActions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .searchBox {
+    max-width: none;
+  }
+  .hotelCitySections {
+    gap: 14px;
+  }
+  .citySectionHead {
+    padding: 10px 12px;
+  }
+  .citySectionHead h3 {
+    font-size: 16px;
+  }
+  .hotelCard img {
+    max-height: 170px;
+  }
+  .hotelCardBody {
+    padding: 12px;
+  }
+  .hotelCard h3 {
+    font-size: 15px;
+  }
+  .vehicleInfo {
+    gap: 9px;
+  }
+  .vehicleInfo img {
+    width: 62px;
+    height: 42px;
+  }
+  .modal {
+    padding: 10px;
+    align-items: center;
+  }
+  .modalCard {
+    width: 100%;
+    max-height: calc(100vh - 28px);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .wideModal {
+    width: 100%;
+  }
+  .modalCard h2 {
+    top: -16px;
+    margin: -16px -16px 4px;
+    padding: 16px 52px 12px 16px;
+  }
+  .modalActions {
+    bottom: -16px;
+    margin: 4px -16px -16px;
+    padding: 12px 16px;
+    justify-content: stretch;
+  }
+  .modalActions .primaryBtn {
+    width: 100%;
   }
   #recordFields {
     grid-template-columns: 1fr;
   }
   .seasonEditor {
     grid-template-columns: 1fr;
+  }
+  .detailsTable > tbody > tr > th,
+  .detailsTable > tbody > tr > td {
+    display: block;
+    width: 100%;
+  }
+  .detailsTable > tbody > tr > th {
+    border-bottom: 0;
+    padding-bottom: 4px;
+  }
+  .detailsTable > tbody > tr > td {
+    padding-top: 4px;
   }
 }

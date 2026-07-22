@@ -2,7 +2,7 @@ const { hotels: baseHotels, routePresets, transportRates: baseTransportRates, tr
 
 const state = {
   startDate: "",
-  routePresetId: "mk-md",
+  routePresetId: "",
   nights: 6,
   adults: 2,
   children: 0,
@@ -409,6 +409,7 @@ function quote() {
 
 function render() {
   document.body.dataset.step = wizardSteps[state.currentStep].title.toLowerCase();
+  document.body.dataset.submitted = state.submitted ? "true" : "false";
   if (!state.submitted) {
     document.getElementById("resultBar").classList.add("hidden");
     document.getElementById("itinerary").classList.add("hidden");
@@ -418,6 +419,46 @@ function render() {
   bind();
   renderSummary();
   renderStepButtons();
+}
+
+function focusFieldAfterRender(key) {
+  requestAnimationFrame(() => {
+    const field = document.querySelector(`[data-field="${key}"]`);
+    if (!field) return;
+    field.scrollIntoView({ behavior: "smooth", block: "center" });
+    field.focus({ preventScroll: true });
+  });
+}
+
+function focusSelectorAfterRender(selector, block = "center") {
+  requestAnimationFrame(() => {
+    const element = document.querySelector(selector);
+    if (!element) return;
+    element.scrollIntoView({ behavior: "smooth", block });
+    element.focus({ preventScroll: true });
+  });
+}
+
+function moveToNextStepField(key) {
+  if (state.currentStep !== 0) return;
+  if (key === "contactName" && state.contactName.trim().length >= 2) focusFieldAfterRender("phone");
+  if (key === "phone" && validPhone(state.phone)) focusSelectorAfterRender("[data-route-card]");
+  if (key === "startDate" && state.startDate) focusFieldAfterRender("nights");
+  if (key === "nights" && Number(state.nights) > 0) focusSelectorAfterRender("#designBtn");
+}
+
+function moveAfterHotelSelection(selectedStopIndex) {
+  const plan = stopPlan();
+  const nextStop = plan.find((stop) => stop.index > selectedStopIndex);
+  if (nextStop) {
+    state.activeHotelStop = nextStop.index;
+    state.hotelCategory = "Economy";
+    render();
+    focusSelectorAfterRender(".hotelChooser", "start");
+    return;
+  }
+  render();
+  focusSelectorAfterRender("#designBtn");
 }
 
 function stepContent() {
@@ -785,6 +826,7 @@ function commitField(input) {
     state[key] = value;
     renderSummary();
     renderStepButtons();
+    if (key === "phone") moveToNextStepField(key);
     return;
   }
   state[key] = input.type === "number" ? Math.max(0, Number(value)) : value;
@@ -794,6 +836,7 @@ function commitField(input) {
     state.selectedHotels = {};
     resetStopNights();
   }
+  moveToNextStepField(key);
   render();
 }
 
@@ -807,6 +850,11 @@ function bind() {
       state.hotelCategory = "Economy";
       resetStopNights();
       render();
+      if (state.routePresetId === "custom") {
+        focusSelectorAfterRender("[data-add-city]");
+      } else {
+        focusFieldAfterRender("startDate");
+      }
     });
   });
   document.querySelectorAll("[data-add-city]").forEach((button) => {
@@ -893,7 +941,16 @@ function bind() {
   document.querySelectorAll("[data-field]").forEach((input) => {
     if (["contactName", "phone"].includes(input.dataset.field)) {
       input.addEventListener("input", (event) => commitField(event.currentTarget));
+      input.addEventListener("blur", (event) => {
+        commitField(event.currentTarget);
+        moveToNextStepField(event.currentTarget.dataset.field);
+      });
       input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          commitField(event.currentTarget);
+          moveToNextStepField(event.currentTarget.dataset.field);
+        }
         if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
           event.preventDefault();
           commitField(event.currentTarget);
@@ -947,8 +1004,9 @@ function bind() {
   });
   document.querySelectorAll("[data-hotel]").forEach((button) => {
     button.addEventListener("click", () => {
+      const selectedStopIndex = state.activeHotelStop;
       state.selectedHotels[button.dataset.hotelKey] = button.dataset.hotel;
-      render();
+      moveAfterHotelSelection(selectedStopIndex);
     });
   });
   document.querySelectorAll("[data-sector]").forEach((input) => {
@@ -1041,12 +1099,21 @@ function renderItinerary(q = quote()) {
   `;
 }
 
+function showSubmitModal() {
+  document.getElementById("submitModal")?.classList.remove("hidden");
+}
+
+function closeSubmitModal() {
+  document.getElementById("submitModal")?.classList.add("hidden");
+}
+
 function viewItinerary() {
   state.submitted = true;
   saveDashboardLead(quote());
   document.getElementById("resultBar").classList.remove("hidden");
   renderItinerary(quote());
   renderStepButtons();
+  showSubmitModal();
   document.getElementById("itinerary").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -1370,7 +1437,14 @@ function writePdfObjects(objects) {
 
 document.getElementById("designBtn").addEventListener("click", nextStep);
 document.getElementById("backStepBtn").addEventListener("click", previousStep);
-document.getElementById("editTripBtn").addEventListener("click", () => document.getElementById("designer").scrollIntoView({ behavior: "smooth" }));
+document.getElementById("editTripBtn").addEventListener("click", () => {
+  state.submitted = false;
+  state.leadSaved = false;
+  closeSubmitModal();
+  render();
+  document.getElementById("designer").scrollIntoView({ behavior: "smooth" });
+});
 document.getElementById("pdfBtn").addEventListener("click", downloadPdf);
+document.querySelectorAll("[data-close-submit]").forEach((button) => button.addEventListener("click", closeSubmitModal));
 
 render();
